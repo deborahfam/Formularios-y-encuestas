@@ -86,7 +86,8 @@ if st.button("Enviar respuesta"):
 
     # Crear una nueva fila con los valores ingresados
     new_row = {word: 0 for word in responses.columns}
-    new_row.update({word: 1 for word in less_words.union(more_words)})
+    new_row.update({word: "1-" for word in less_words})
+    new_row.update({word: "1+" for word in more_words})
     new_row["Número de muestra"] = sample_number
     new_row["Identificación"] = user_id
 
