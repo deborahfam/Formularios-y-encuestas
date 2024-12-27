@@ -2,22 +2,42 @@ import streamlit as st
 import pandas as pd
 import os
 
-# Ruta del archivo CSV donde se guardarán las respuestas
-CSV_FILE = "respuestas.csv"
-
 # Función para cargar o inicializar el CSV
-def load_csv():
-    if os.path.exists(CSV_FILE):
-        return pd.read_csv(CSV_FILE, index_col=0)
+def load_csv(file_path):
+    if os.path.exists(file_path):
+        return pd.read_csv(file_path, index_col=0)
     else:
         return pd.DataFrame(columns=["Identificación", "Número de muestra"])
 
 # Función para guardar el dataframe al CSV
-def save_csv(df):
-    df.to_csv(CSV_FILE)
+def save_csv(df, file_path):
+    df.to_csv(file_path)
+
+# Seleccionar o gestionar archivos CSV existentes
+st.title("Gestión de Archivos CSV")
+
+# Mostrar lista de archivos CSV en el directorio actual
+csv_files = [f for f in os.listdir() if f.endswith('.csv')]
+selected_csv = st.selectbox("Seleccionar archivo CSV:", options=["Crear nuevo"] + csv_files)
+
+if selected_csv == "Crear nuevo":
+    new_csv_name = st.text_input("Nombre del nuevo archivo CSV (incluya .csv):")
+    if st.button("Crear archivo CSV"):
+        if new_csv_name and not os.path.exists(new_csv_name):
+            pd.DataFrame(columns=["Identificación", "Número de muestra"]).to_csv(new_csv_name)
+            st.success(f"Archivo '{new_csv_name}' creado exitosamente.")
+        elif os.path.exists(new_csv_name):
+            st.error("El archivo ya existe.")
+else:
+    CSV_FILE = selected_csv
+    # Permitir eliminar el archivo seleccionado
+    if st.button("Eliminar archivo seleccionado"):
+        os.remove(CSV_FILE)
+        st.success(f"Archivo '{CSV_FILE}' eliminado exitosamente.")
+        st.stop()
 
 # Cargar o inicializar el CSV
-responses = load_csv()
+responses = load_csv(CSV_FILE)
 
 # Crear el formulario en Streamlit
 st.title("Formulario de Evaluación de Muestras")
@@ -64,7 +84,7 @@ if st.button("Enviar respuesta"):
     responses = responses[["Identificación", "Número de muestra"] + [col for col in responses.columns if col not in ["Identificación", "Número de muestra"]]]
 
     # Guardar los cambios en el CSV
-    save_csv(responses)
+    save_csv(responses, CSV_FILE)
 
     st.success("Respuesta guardada exitosamente.")
 
