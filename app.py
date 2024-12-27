@@ -10,7 +10,7 @@ def load_csv():
     if os.path.exists(CSV_FILE):
         return pd.read_csv(CSV_FILE, index_col=0)
     else:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=["Identificación", "Número de muestra"])
 
 # Función para guardar el dataframe al CSV
 def save_csv(df):
@@ -31,6 +31,10 @@ if user_id in responses.get("Identificación", []):
 # Input para el número de muestra
 sample_number = st.text_input("Número de la muestra:")
 
+# Selector para el tipo de separación de respuestas
+separator_type = st.radio("Seleccione el tipo de separación de palabras:", ("Fila", "Coma"))
+separator = "\n" if separator_type == "Fila" else ","
+
 # Inputs para las descripciones
 less_than_reference = st.text_area("La muestra es menos que la referencia (describa):")
 more_than_reference = st.text_area("La muestra es más que la referencia (describa):")
@@ -38,13 +42,13 @@ more_than_reference = st.text_area("La muestra es más que la referencia (descri
 # Botón para enviar el formulario
 if st.button("Enviar respuesta"):
     # Tokenizar palabras ingresadas por el usuario
-    less_words = set(less_than_reference.split())
-    more_words = set(more_than_reference.split())
+    less_words = set(less_than_reference.split(separator))
+    more_words = set(more_than_reference.split(separator))
 
     # Unir las palabras únicas
     all_words = less_words.union(more_words)
 
-    # Actualizar el DataFrame de respuestas
+    # Asegurar que las columnas Identificación y Número de muestra estén al inicio
     for word in all_words:
         if word not in responses.columns:
             responses[word] = 0
@@ -55,9 +59,9 @@ if st.button("Enviar respuesta"):
     new_row["Número de muestra"] = sample_number
     new_row["Identificación"] = user_id
 
-    # Agregar la nueva fila al DataFrame
-    new_row_df = pd.DataFrame([new_row])  # Convert the new row to a DataFrame
-    responses = pd.concat([responses, new_row_df], ignore_index=True)
+    # Reordenar las columnas para que Identificación y Número de muestra estén al inicio
+    responses = pd.concat([responses, pd.DataFrame([new_row])], ignore_index=True)
+    responses = responses[["Identificación", "Número de muestra"] + [col for col in responses.columns if col not in ["Identificación", "Número de muestra"]]]
 
     # Guardar los cambios en el CSV
     save_csv(responses)
