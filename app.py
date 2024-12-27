@@ -20,12 +20,15 @@ st.title("Gestión de Archivos CSV")
 csv_files = [f for f in os.listdir() if f.endswith('.csv')]
 selected_csv = st.selectbox("Seleccionar archivo CSV:", options=["Crear nuevo"] + csv_files)
 
+CSV_FILE = None
+
 if selected_csv == "Crear nuevo":
     new_csv_name = st.text_input("Nombre del nuevo archivo CSV (incluya .csv):")
     if st.button("Crear archivo CSV"):
         if new_csv_name and not os.path.exists(new_csv_name):
             pd.DataFrame(columns=["Identificación", "Número de muestra"]).to_csv(new_csv_name)
             st.success(f"Archivo '{new_csv_name}' creado exitosamente.")
+            CSV_FILE = new_csv_name
         elif os.path.exists(new_csv_name):
             st.error("El archivo ya existe.")
 else:
@@ -35,6 +38,10 @@ else:
         os.remove(CSV_FILE)
         st.success(f"Archivo '{CSV_FILE}' eliminado exitosamente.")
         st.stop()
+
+if not CSV_FILE:
+    st.warning("Por favor, seleccione o cree un archivo CSV antes de continuar.")
+    st.stop()
 
 # Cargar o inicializar el CSV
 responses = load_csv(CSV_FILE)
