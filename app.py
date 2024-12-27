@@ -56,7 +56,7 @@ if st.button("Enviar respuesta"):
     new_row["Identificación"] = user_id
 
     # Agregar la nueva fila al DataFrame
-    responses = responses.append(new_row, ignore_index=True)
+    responses = responses.add(new_row, ignore_index=True)
 
     # Guardar los cambios en el CSV
     save_csv(responses)
