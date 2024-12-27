@@ -69,11 +69,15 @@ more_than_reference = st.text_area("La muestra es más que la referencia (descri
 # Botón para enviar el formulario
 if st.button("Enviar respuesta"):
     # Tokenizar palabras ingresadas por el usuario
-    less_words = set(less_than_reference.split(separator))
-    more_words = set(more_than_reference.split(separator))
+    less_words = set(filter(None, less_than_reference.split(separator)))
+    more_words = set(filter(None, more_than_reference.split(separator)))
 
     # Unir las palabras únicas
     all_words = less_words.union(more_words)
+
+    if not all_words and not sample_number.strip() and not user_id.strip():
+        st.warning("No se permite guardar respuestas vacías. Por favor, complete al menos un campo.")
+        st.stop()
 
     # Asegurar que las columnas Identificación y Número de muestra estén al inicio
     for word in all_words:
